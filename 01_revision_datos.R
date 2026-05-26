@@ -453,7 +453,7 @@ write_csv(airbnb_tipo_barrio, "outputs/tablas/airbnb_tipo_barrio_revision.csv")
 write_csv(airbnb_vivienda_entera_barrio, "outputs/tablas/airbnb_vivienda_entera_barrio_revision.csv")
 write_csv(alquiler_municipal_anual, "outputs/tablas/alquiler_municipal_anual_revision.csv")
 
-print("Revisión inicial terminada")
+
 
 
 

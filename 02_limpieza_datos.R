@@ -439,7 +439,7 @@ st_write(
 )
 
 
-print("Limpieza de datos terminada.")
+
 
 
 
