@@ -10,6 +10,8 @@ El análisis se realiza a escala de barrio y combina datos de alojamientos Airbn
 
 El objetivo principal del proyecto es analizar en qué barrios de València se concentra la oferta de alojamientos Airbnb y cómo se relaciona esta concentración con la población residente y el contexto socioeconómico.
 
+El informe final del trabajo se encuentra en `informe_final.pdf`. El archivo fuente utilizado para generarlo es `informe_final.qmd`.
+
 ## Estructura del repositorio
 
 ```text
