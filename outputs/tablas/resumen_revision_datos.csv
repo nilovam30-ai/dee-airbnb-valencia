@@ -1,0 +1,13 @@
+dataset,filas,columnas
+Airbnb original,7844,79
+Airbnb dentro de València,7844,80
+Barrios Airbnb,88,3
+Barrios Geoportal,88,7
+Alquiler original,152376,8
+Alquiler València municipal,78,10
+VUT GVA original,101408,33
+VUT GVA València,6149,33
+VUT GVA València en alta,6147,35
+Renta original,3009312,6
+Renta València,33588,6
+Excel población barrios,87,NA
