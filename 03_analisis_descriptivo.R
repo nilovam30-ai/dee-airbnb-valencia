@@ -1,17 +1,15 @@
-# ============================================================
-# 03_analisis_descriptivo.R
+
 # Análisis descriptivo y primeros resultados
-# Proyecto: Airbnb y presión residencial en València
-# ============================================================
 
 
-# 1. Paquetes -------------------------------------------------------------
+
+# 1. Paquetes
 
 library(tidyverse)
 library(sf)
 
 
-# 2. Leer datos limpios ---------------------------------------------------
+# 2. Leer datos limpios
 
 barrios_indicadores <- st_read(
   "outputs/geodatos/barrios_indicadores_limpios.gpkg",
@@ -39,7 +37,7 @@ renta_distritos_2023 <- read_csv(
 )
 
 
-# 3. Crear carpetas de salida --------------------------------------------
+# 3. Crear carpetas de salida
 
 if (!dir.exists("outputs")) {
   dir.create("outputs")
@@ -54,7 +52,7 @@ if (!dir.exists("outputs/figuras")) {
 }
 
 
-# 4. Resumen general del análisis ----------------------------------------
+# 4. Resumen general del análisis
 
 resumen_general <- barrios_indicadores %>%
   st_drop_geometry() %>%
@@ -90,7 +88,7 @@ write_csv(
 )
 
 
-# 5. Ranking de barrios por número total de Airbnb ------------------------
+# 5. Ranking de barrios por número total de Airbnb
 
 ranking_airbnb_total <- barrios_indicadores %>%
   st_drop_geometry() %>%
@@ -142,7 +140,7 @@ ggsave(
 )
 
 
-# 6. Ranking de barrios por Airbnb por km2 -------------------------------
+# 6. Ranking de barrios por Airbnb por km2
 
 ranking_airbnb_km2 <- barrios_indicadores %>%
   st_drop_geometry() %>%
@@ -194,7 +192,7 @@ ggsave(
 )
 
 
-# 7. Ranking de barrios por Airbnb por 1.000 habitantes -------------------
+# 7. Ranking de barrios por Airbnb por 1.000 habitantes
 
 ranking_airbnb_1000 <- barrios_indicadores %>%
   st_drop_geometry() %>%
@@ -246,7 +244,7 @@ ggsave(
 )
 
 
-# 8. Peso de vivienda completa -------------------------------------------
+# 8. Peso de vivienda completa
 
 ranking_vivienda_completa <- barrios_indicadores %>%
   st_drop_geometry() %>%
@@ -297,7 +295,7 @@ ggsave(
 )
 
 
-# 9. Evolución del alquiler municipal ------------------------------------
+# 9. Evolución del alquiler municipal
 
 
 alquiler_municipal_anual
@@ -348,7 +346,7 @@ ggsave(
 )
 
 
-# 10. Evolución de viviendas turísticas oficiales -------------------------
+# 10. Evolución de viviendas turísticas oficiales
 
 vut_valencia_anual
 
@@ -373,8 +371,7 @@ ggsave(
 )
 
 
-# 11. Renta por distritos -------------------------------------------------
-
+# 11. Renta por distritos 
 renta_distritos_2023 <- renta_distritos_2023 %>%
   mutate(
     codigo_distrito = str_extract(Distritos, "46250\\d{2}"),
@@ -405,7 +402,7 @@ ggsave(
 )
 
 
-# 12. Relación descriptiva entre Airbnb y variables de barrio -------------
+# 12. Relación descriptiva entre Airbnb y variables de barrio
 
 tabla_correlaciones <- barrios_indicadores %>%
   st_drop_geometry() %>%
@@ -470,7 +467,7 @@ ggsave(
 )
 
 
-# 13. Mapas finales -------------------------------------------------------
+# 13. Mapas finales
 
 mapa_airbnb_total <- ggplot() +
   geom_sf(data = barrios_indicadores,
@@ -552,7 +549,7 @@ ggsave(
 )
 
 
-# 14. Tabla de resultados principales ------------------------------------
+# 14. Tabla de resultados principales
 
 resultados_principales <- barrios_indicadores %>%
   st_drop_geometry() %>%

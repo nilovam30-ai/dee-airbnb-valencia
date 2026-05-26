@@ -1,8 +1,6 @@
-# ============================================================
-# 01_revision_datos.R
+
 # Revisión inicial de los datos
-# Proyecto: Airbnb y presión residencial en València
-# ============================================================
+
 
 
 # 1. Paquetes 

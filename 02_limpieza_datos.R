@@ -1,8 +1,6 @@
-# ============================================================
-# 02_limpieza_datos.R
+
 # Limpieza y preparación de datos para el análisis
-# Proyecto: Airbnb y presión residencial en València
-# ============================================================
+
 
 
 # 1. Paquetes 
