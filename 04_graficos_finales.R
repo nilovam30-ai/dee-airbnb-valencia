@@ -96,7 +96,7 @@ if (!dir.exists("outputs/tablas")) {
 }
 
 
-# 5. Colores comunes
+# 6. Colores comunes
 
 color_principal  <- "#C0392B"
 color_secundario <- "#2980B9"
@@ -104,7 +104,7 @@ color_neutro     <- "#ECF0F1"
 color_texto      <- "#2C3E50"
 
 
-# 6. Datos proyectados y zoom urbano
+# 7. Datos proyectados y zoom urbano
 
 barrios_25830 <- barrios_indicadores %>%
   st_transform(25830)
@@ -121,21 +121,21 @@ bbox_urbano <- st_bbox(c(
 
 
 # 1
-# Mapa de densidad Airbnb por km2
+# Mapa de presión Airbnb por 1.000 habitantes
 
 
-g1_mapa_km2 <- ggplot() +
+g1_mapa_1000 <- ggplot() +
   geom_sf(
     data = barrios_25830,
-    aes(fill = airbnb_por_km2),
+    aes(fill = airbnb_por_1000_hab),
     color = "white",
     linewidth = 0.25
   ) +
   scale_fill_gradientn(
-    colors = c("#FFF7EC", "#FDD49E", "#FC8D59", "#E34A33", "#B30000"),
+    colors = c("#F7FBFF", "#C6DBEF", "#6BAED6", "#2171B5", "#08306B"),
     trans = "sqrt",
     labels = label_number(big.mark = ".", decimal.mark = ",", accuracy = 1),
-    name = "Airbnb\npor km²"
+    name = "Airbnb por\n1.000 hab."
   ) +
   coord_sf(
     xlim = c(bbox_urbano["xmin"], bbox_urbano["xmax"]),
@@ -143,27 +143,27 @@ g1_mapa_km2 <- ggplot() +
     expand = FALSE
   ) +
   labs(
-    title = "Densidad de alojamientos Airbnb por barrio",
-    subtitle = "Alojamientos por kilómetro cuadrado en el área urbana de València",
-    caption = "Fuente: elaboración propia a partir de Inside Airbnb y cartografía municipal."
+    title = "Presión Airbnb por 1.000 habitantes",
+    subtitle = "Alojamientos Airbnb en relación con la población residente por barrio",
+    caption = "Fuente: elaboración propia a partir de Inside Airbnb, padrón municipal y cartografía municipal."
   ) +
   theme_void(base_size = 12) +
   theme(
     plot.title = element_text(face = "bold", color = color_texto, size = 14),
     plot.subtitle = element_text(color = "grey40", size = 10),
     plot.caption = element_text(color = "grey55", size = 8, hjust = 0),
-    legend.position = c(0.88, 0.45),
+    legend.position = c(0.87, 0.45),
     legend.background = element_rect(fill = "white", color = NA),
     legend.title = element_text(size = 9, face = "bold"),
     legend.text = element_text(size = 8),
     plot.margin = margin(10, 10, 10, 10)
   )
 
-g1_mapa_km2
+g1_mapa_1000
 
 ggsave(
-  "outputs/figuras_finales/01_mapa_densidad_airbnb_km2.png",
-  g1_mapa_km2,
+  "outputs/figuras_finales/01_mapa_airbnb_1000_habitantes.png",
+  g1_mapa_1000,
   width = 7.5,
   height = 7.5,
   dpi = 300
@@ -281,6 +281,7 @@ ggsave(
 
 # 3
 # Mapa bivariante: presión Airbnb + renta
+
 
 if ("renta_neta_persona" %in% names(renta_distritos_2023)) {
   
@@ -666,6 +667,7 @@ write_csv(
 # A3
 # Diagrama de Moran
 
+
 moran_df <- tibble(
   x_std = x_std,
   wx_std = wx_std,
@@ -681,7 +683,13 @@ moran_df <- tibble(
     ),
     cuadrante = factor(
       cuadrante,
-      levels = c("Alto-Alto", "Bajo-Bajo", "Alto-Bajo", "Bajo-Alto", "Sin clasificar")
+      levels = c(
+        "Alto-Alto",
+        "Bajo-Bajo",
+        "Alto-Bajo",
+        "Bajo-Alto",
+        "Sin clasificar"
+      )
     )
   )
 
@@ -785,8 +793,6 @@ ggsave(
 # Evolución VUT y alquiler municipal
 
 
-# Preparar VUT de forma robusta
-
 vut_year_col <- if ("anio_alta" %in% names(vut_valencia_anual)) {
   "anio_alta"
 } else {
@@ -804,8 +810,6 @@ vut_serie <- vut_valencia_anual %>%
     vut = as.numeric(.data[[vut_value_col]])
   ) %>%
   filter(!is.na(anio), !is.na(vut))
-
-# Preparar alquiler de forma robusta
 
 alq_year_col <- if ("AÑO" %in% names(alquiler_municipal_anual)) {
   "AÑO"
@@ -923,4 +927,53 @@ ggsave(
   dpi = 300
 )
 
+
+# A5
+# Mapa de densidad Airbnb por km2
+
+
+gA5_mapa_km2 <- ggplot() +
+  geom_sf(
+    data = barrios_25830,
+    aes(fill = airbnb_por_km2),
+    color = "white",
+    linewidth = 0.25
+  ) +
+  scale_fill_gradientn(
+    colors = c("#FFF7EC", "#FDD49E", "#FC8D59", "#E34A33", "#B30000"),
+    trans = "sqrt",
+    labels = label_number(big.mark = ".", decimal.mark = ",", accuracy = 1),
+    name = "Airbnb\npor km²"
+  ) +
+  coord_sf(
+    xlim = c(bbox_urbano["xmin"], bbox_urbano["xmax"]),
+    ylim = c(bbox_urbano["ymin"], bbox_urbano["ymax"]),
+    expand = FALSE
+  ) +
+  labs(
+    title = "Densidad de alojamientos Airbnb por km²",
+    subtitle = "Alojamientos por kilómetro cuadrado en el área urbana de València",
+    caption = "Fuente: elaboración propia a partir de Inside Airbnb y cartografía municipal."
+  ) +
+  theme_void(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold", color = color_texto, size = 14),
+    plot.subtitle = element_text(color = "grey40", size = 10),
+    plot.caption = element_text(color = "grey55", size = 8, hjust = 0),
+    legend.position = c(0.88, 0.45),
+    legend.background = element_rect(fill = "white", color = NA),
+    legend.title = element_text(size = 9, face = "bold"),
+    legend.text = element_text(size = 8),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+
+gA5_mapa_km2
+
+ggsave(
+  "outputs/figuras_anexo/A5_mapa_densidad_airbnb_km2.png",
+  gA5_mapa_km2,
+  width = 7.5,
+  height = 7.5,
+  dpi = 300
+)
 
