@@ -1,0 +1,8 @@
+.DS_Store
+~$*
+.Rhistory
+.RData
+.Rproj.user/
+
+data/cartografia/30824.csv
+data/cartografia/seccionado_2024/
