@@ -5,14 +5,14 @@
 # ============================================================
 
 
-# 1. Paquetes -------------------------------------------------------------
+# 1. Paquetes 
 
 library(tidyverse)
 library(sf)
 library(readxl)
 
 
-# 2. Lectura de Airbnb ----------------------------------------------------
+# 2. Lectura de Airbnb 
 
 archivo_airbnb <- "data/airbnb/listings.csv.gz"
 
@@ -60,7 +60,7 @@ airbnb_sf <- airbnb_limpio %>%
   )
 
 
-# 3. Lectura de barrios oficiales ----------------------------------------
+# 3. Lectura de barrios oficiales 
 
 barrios <- st_read("data/cartografia/query.geojson", quiet = TRUE)
 
@@ -71,7 +71,7 @@ dim(barrios)
 names(barrios)
 
 
-# 4. Unir Airbnb con barrios ---------------------------------------------
+# 4. Unir Airbnb con barrios 
 
 airbnb_barrios <- st_join(airbnb_sf, barrios)
 
@@ -82,7 +82,7 @@ airbnb_barrios %>%
   count(nombre, sort = TRUE)
 
 
-# 5. Airbnb por barrio ----------------------------------------------------
+# 5. Airbnb por barrio 
 
 airbnb_por_barrio <- airbnb_barrios %>%
   st_drop_geometry() %>%
@@ -102,7 +102,7 @@ airbnb_por_barrio <- airbnb_barrios %>%
 airbnb_por_barrio
 
 
-# 6. Superficie de barrios ------------------------------------------------
+# 6. Superficie de barrios 
 
 # Se transforma a EPSG:25830 para calcular áreas en metros.
 # Después se vuelve a EPSG:4326 para trabajar y representar mapas.
@@ -121,7 +121,7 @@ barrios_area %>%
   arrange(desc(area_km2))
 
 
-# 7. Indicadores Airbnb por barrio ---------------------------------------
+# 7. Indicadores Airbnb por barrio 
 
 barrios_airbnb <- barrios_area %>%
   left_join(
@@ -156,7 +156,7 @@ ggplot() +
   theme_minimal()
 
 
-# 8. Viviendas turísticas oficiales GVA ----------------------------------
+# 8. Viviendas turísticas oficiales GVA 
 
 vut_gva <- read_csv2(
   "data/vivienda/listaviviendas_20250126.csv",
@@ -190,7 +190,7 @@ ggplot(vut_valencia_anual, aes(x = anio_alta, y = n)) +
   theme_minimal()
 
 
-# 9. Alquiler municipal ---------------------------------------------------
+# 9. Alquiler municipal
 
 alquiler <- st_read("data/vivienda/alquiler_georreferenciado.geojson", quiet = TRUE)
 
@@ -224,7 +224,7 @@ ggplot(alquiler_municipal_anual, aes(x = AÑO, y = alquiler_medio)) +
   theme_minimal()
 
 
-# 10. Renta media ---------------------------------------------------------
+# 10. Renta media
 
 renta <- read_csv2(
   "data/cartografia/30824.csv",
@@ -273,25 +273,19 @@ head(renta_distritos_2023)
 head(renta_secciones_2023)
 
 
-# 11. Población por barrios ----------------------------------------------
+# 11. Población por barrios
 
 archivos_barrios2024 <- list.files(
   "data/vivienda/Barrios2024",
-  pattern = "\\.xlsx$",
+  pattern = "^Distrito_.*\\.xlsx$",
   full.names = TRUE
 )
 
-archivos_barrios2024 <- archivos_barrios2024[
-  !str_detect(archivos_barrios2024, "~\\$")
-]
-
 length(archivos_barrios2024)
 
+poblacion_barrios <- tibble()
 
-# Función para extraer población 2024 de cada Excel.
-# Busca el año 2024 en las filas cercanas y toma el valor de la fila inferior.
-
-leer_poblacion_barrio <- function(archivo) {
+for (archivo in archivos_barrios2024) {
   
   tabla <- read_xlsx(
     archivo,
@@ -299,44 +293,19 @@ leer_poblacion_barrio <- function(archivo) {
     .name_repair = "minimal"
   )
   
-  tabla_texto <- tabla %>%
-    mutate(across(everything(), as.character))
+  poblacion_2024 <- tabla[10, ncol(tabla)] %>%
+    unlist(use.names = FALSE) %>%
+    as.numeric()
   
-  filas_busqueda <- 7:15
-  
-  tabla_busqueda <- tabla_texto[filas_busqueda, ]
-  
-  posicion_2024 <- which(
-    tabla_busqueda == "2024" | tabla_busqueda == "2024.0",
-    arr.ind = TRUE
-  )
-  
-  if (nrow(posicion_2024) == 0) {
-    
-    poblacion_2024 <- NA_real_
-    
-  } else {
-    
-    fila_2024 <- filas_busqueda[posicion_2024[1, "row"]]
-    columna_2024 <- posicion_2024[1, "col"]
-    
-    valor <- tabla_texto[fila_2024 + 1, columna_2024] %>%
-      unlist(use.names = FALSE)
-    
-    poblacion_2024 <- parse_number(
-      valor,
-      locale = locale(grouping_mark = ".", decimal_mark = ",")
-    )
-  }
-  
-  tibble(
+  fila <- tibble(
     archivo = basename(archivo),
     poblacion_2024 = poblacion_2024
   )
+  
+  poblacion_barrios <- bind_rows(poblacion_barrios, fila)
 }
 
-
-poblacion_barrios <- map_dfr(archivos_barrios2024, leer_poblacion_barrio) %>%
+poblacion_barrios <- poblacion_barrios %>%
   mutate(
     distrito = str_extract(archivo, "(?<=Distrito_)\\d+"),
     barrio = str_extract(archivo, "(?<=Barrio_)\\d+"),
@@ -344,6 +313,17 @@ poblacion_barrios <- map_dfr(archivos_barrios2024, leer_poblacion_barrio) %>%
     codbarrio = as.character(as.numeric(barrio))
   ) %>%
   select(coddistrit, codbarrio, poblacion_2024, archivo)
+
+# Corrección manual: en El Pla del Remei el dato está en otra fila del Excel
+poblacion_barrios <- poblacion_barrios %>%
+  mutate(
+    poblacion_2024 = if_else(
+      coddistrit == "2" & codbarrio == "2",
+      7240,
+      poblacion_2024
+    )
+  )
+
 
 poblacion_barrios
 
@@ -356,7 +336,7 @@ poblacion_barrios %>%
   filter(is.na(poblacion_2024))
 
 
-# 12. Añadir población a barrios -----------------------------------------
+# 12. Añadir población a barrios 
 
 barrios_indicadores <- barrios_airbnb %>%
   left_join(
@@ -382,8 +362,7 @@ barrios_indicadores %>%
   filter(is.na(poblacion_2024)) %>%
   select(coddistrit, codbarrio, nombre)
 
-
-# 13. Mapas de comprobación ----------------------------------------------
+# 13. Mapas de comprobación 
 
 ggplot() +
   geom_sf(data = barrios_indicadores, aes(fill = airbnb_por_1000_hab), color = "white") +
@@ -400,7 +379,7 @@ ggplot() +
   theme_minimal()
 
 
-# 14. Guardar datos limpios ----------------------------------------------
+# 14. Guardar datos limpios 
 
 if (!dir.exists("outputs")) {
   dir.create("outputs")
@@ -461,4 +440,6 @@ st_write(
 
 
 print("Limpieza de datos terminada.")
+
+
 
